@@ -1,0 +1,31 @@
+<!-- footer.html -->
+{% block footer %}
+<html>
+<head></head>
+
+<body onload="current_time()">
+	<span id="current"></span>
+</body>
+</html>
+
+
+<script>
+
+function mynow(){
+	NowDate=new Date();
+	y=NowDate.getFullYear();
+	M=NowDate.getMonth()+1;
+	d1=NowDate.getDate();
+	h=NowDate.getHours();
+	m=NowDate.getMinutes();
+	s=NowDate.getSeconds();
+}
+
+function current_time(){
+  mynow();
+　document.getElementById('current').innerHTML = '現在時刻:'+y+'/'+M+'/'+d1+' '+h+':'+m+':'+s;
+　setTimeout('current_time()',1000);
+}
+
+</script>
+{% endblock %}
