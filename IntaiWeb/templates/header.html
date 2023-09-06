@@ -1,59 +1,18 @@
 <!-- header.html -->
+{% load static %}
+<h5>
+    <img src="{% static 'img/logo.jpg' %}" width="150">
+    電子看板
 
-<html>
-  <head>
-    <meta charset="utf-8" >
-    <title>電子看板 Header</title>
-  </head>
-  <body>
-        <img src="static/img/logo.jpg" style="vertical-align:middle;">
-        <span style="font-family:標楷體;font-size: 40px;"> 電子看板 </span>
-        {% if UDTime  %}
-            <span calss='myDTime' style="font-family:標楷體;"> 更新時間:{{ UDTime }} </span>
-        {% else  %}
-            <span calss='myDTime' style="font-family:標楷體;"> 更新時間:??? </span>
-        {% endif  %}
-        <Br>
+    <button onclick='runningtables()' href="http://www.google.com">後拉看板總表</button><span id='r1'></span>
+    <button onclick='runningtables()'>日目標_進度_wip分布</button><span id='r2'></span>
+    <button onclick='outputers()'>出貨準備達成進度</button><span id='r3'></span>
 
-        <button onclick='runningtables()' href="http://www.google.com">後拉看板總表</button><span id='r1'></span>
-        <button onclick='runningtables()'>日目標_進度_wip分布</button><span id='r2'></span>
-        <button onclick='outputers()'>出貨準備達成進度</button><span id='r3'></span><BR>
+    {% if UDTime  %}
+        <span calss='myDTime' style="font-family:標楷體;"> 更新時間:{{ UDTime }} </span>
+    {% else  %}
+        <span calss='myDTime' style="font-family:標楷體;"> 更新時間:??? </span>
+    {% endif  %}
 
-        <a href="http://192.168.182.129/Run1/?type=2ETC07&wip=1">後拉看板總表</a>
+</h5>
 
-
-  </body>
-</html>
-
-
-<script>
-function mynow()
-{
-  Today = new Date();
-  yy=Today.getFullYear();
-  mm=Today.getMonth()+1;
-  dd=Today.getDate();
-  h=Today.getHours();
-  m=Today.getMinutes();
-  s=Today.getSeconds();　
-}
-function mDate()
-{
-  mynow();
-  document.getElementById("m1").innerHTML = Today;
-  setTimeout('mDate()',1000)
-}
-function mToday()
-{
-  mynow();
-  document.getElementById("m2").innerHTML = yy+"年"+mm+"月"+dd+"日";
-  setTimeout('mToday()',2000)
-}
-function mTime()
-{
-  mynow()
-  document.getElementById("m3").innerHTML = h+":"+m+":"+s;
-  setTimeout('mTime()',3000)
-}
-
-</script>
