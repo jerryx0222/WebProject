@@ -1,35 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<h1> RunningTables</h1>
-<table border="1">
-  <thred>
-      {% for obj_list in Header_list %}
-    <tr>
-      <th></th>
-      <th></th>
-        {% for item in obj_list %}
-        <th>{{item}}</th>
-        {% endfor %}
-    </tr>
-      {% endfor %}
-  </thred>
+<!-- runninngtables.html -->
+{% extends 'base.html' %}
+{% block title %} RunningTables {% endblock %}
+{% block headmessage %}
 
-  <tbody>
-    <tr>
-      {% for obj_list in data_list %}
+{% endblock %}
+
+{% block myMenu %}
+    {% include 'menu.html' %}
+{% endblock %}
+
+{% block content %}
+    <table border="1">
+      <thred>
+          {% for obj_list in Header_list %}
         <tr>
-        {% for item in obj_list %}
-        <td>{{item}}</td>
-        {% endfor %}
+          <th></th>
+          <th></th>
+            {% for item in obj_list %}
+            <th>{{item}}</th>
+            {% endfor %}
         </tr>
-      {% endfor %}
-    </tr>
-  </tbody>
-</table>
-</body>
-</html>
+          {% endfor %}
+      </thred>
+
+      <tbody>
+        <tr>
+          {% for obj_list in data_list %}
+            <tr>
+            {% for item in obj_list %}
+            <td>{{item}}</td>
+            {% endfor %}
+            </tr>
+          {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+{% endblock %}

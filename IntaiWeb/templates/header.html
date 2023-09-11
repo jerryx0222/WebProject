@@ -1,18 +1,54 @@
 <!-- header.html -->
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body onload='current_time()'>
 {% load static %}
-<h5>
-    <img src="{% static 'img/logo.jpg' %}" width="150">
-    電子看板
+<h6>
+    <a href='/'><img src="{% static 'img/logo.jpg' %}" width="150"></a>
 
-    <button onclick='runningtables()' href="http://www.google.com">後拉看板總表</button><span id='r1'></span>
-    <button onclick='runningtables()'>日目標_進度_wip分布</button><span id='r2'></span>
-    <button onclick='outputers()'>出貨準備達成進度</button><span id='r3'></span>
+    &nbsp;
+    <a href='/runningtables'>後拉看板總表</a>
+    &nbsp;
+    <a href='/runningtables'>日目標_進度_wip分布</a>
+    &nbsp;
+    <a href='/outputers'>出貨準備達成進度</a>
+    &nbsp;&nbsp;
 
+    <font size="1">
     {% if UDTime  %}
-        <span calss='myDTime' style="font-family:標楷體;"> 更新時間:{{ UDTime }} </span>
+        <span class='myDTime' style="font-family:標楷體;"> 更新時間:{{ UDTime }} </span>
     {% else  %}
-        <span calss='myDTime' style="font-family:標楷體;"> 更新時間:??? </span>
+        <span class='myDTime' style="font-family:標楷體;"> 更新時間:??? </span>
     {% endif  %}
+    &nbsp;&nbsp;
+    <span id='current'>  </span>&nbsp;
+    </font>
+</h6>
 
-</h5>
 
+</body>
+</html>
+
+
+
+<script>
+
+function mynow(){
+	NowDate=new Date();
+	y=NowDate.getFullYear();
+	M=NowDate.getMonth()+1;
+	d1=NowDate.getDate();
+	h=NowDate.getHours();
+	m=NowDate.getMinutes();
+	s=NowDate.getSeconds();
+}
+
+function current_time(){
+  mynow();
+　document.getElementById('current').innerHTML = '現在時刻:'+y+'/'+M+'/'+d1+' '+h+':'+m+':'+s;
+　setTimeout('current_time()',1000);
+}
+
+</script>

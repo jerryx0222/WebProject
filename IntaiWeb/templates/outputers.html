@@ -1,52 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
+<!-- runninngtables.html -->
+{% extends 'base.html' %}
+{% block title %} RunningTables {% endblock %}
+{% block headmessage %}
     <title>出貨準備達成進度</title>
     <style>
         .negative {
             color: red;
         }
     </style>
-</head>
-<body>
-<h1> 出貨準備達成進度</h1>
+{% endblock %}
 
-{% for list1 in data_list %}
-    <h1>{{date_list.0}}</h1>
-    <table border="1">
-      <thred>
-        <tr><td></td>
-              {% for item in Header_list %}
-              <td>{{item}}</td>
+{% block myMenu %}
+    <a>O1</a>
+{% endblock %}
+
+{% block content %}
+    {% for list1 in data_list %}
+        <h1>{{date_list.0}}</h1>
+        <table border="1">
+          <thred>
+            <tr><td></td>
+                  {% for item in Header_list %}
+                  <td>{{item}}</td>
+                  {% endfor %}
+            </tr>
+          </thred>
+          <tbody>
+          {% for list2 in list1 %}
+          <tr>
+              {% for item in list2 %}
+                {% if item < 0 %}
+                    {% if forloop.counter == 6 %}
+                        <td class="negative">{{item|floatformat:2}}%</td>
+                    {% else %}
+                        <td class="negative">{{item}}</td>
+                    {% endif %}
+                {% else %}
+                    {% if forloop.counter == 6 %}
+                        <td>{{item|floatformat:2}}%</td>
+                    {% else %}
+                        <td>{{item}}</td>
+                    {% endif %}
+                {% endif %}
               {% endfor %}
-        </tr>
-      </thred>
-      <tbody>
-      {% for list2 in list1 %}
-      <tr>
-          {% for item in list2 %}
-            {% if item < 0 %}
-                {% if forloop.counter == 6 %}
-                    <td class="negative">{{item|floatformat:2}}%</td>
-                {% else %}
-                    <td class="negative">{{item}}</td>
-                {% endif %}
-            {% else %}
-                {% if forloop.counter == 6 %}
-                    <td>{{item|floatformat:2}}%</td>
-                {% else %}
-                    <td>{{item}}</td>
-                {% endif %}
-            {% endif %}
+          </tr>
           {% endfor %}
-      </tr>
-      {% endfor %}
-      </tbody>
+          </tbody>
 
-    </table>
-{% endfor %}
-
-
-</body>
-</html>
+        </table>
+    {% endfor %}
+{% endblock %}

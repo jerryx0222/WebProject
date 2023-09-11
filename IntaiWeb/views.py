@@ -4,14 +4,21 @@ from IntaiWeb import LocalFunctions
 from django import forms
 from datetime import datetime
 
+
 # Create your views here.
 
 def homepage(request):
-    now = datetime.now()
     SysDatas = models.SystemSet.objects.filter(DataName='UpdateDateTime')
     for obj in SysDatas:
         UDTime=obj.StrData
-    return render(request, "index.html", locals())
+
+    lstTypes = []
+    lstProducts = []
+    GetSelectLists(0,lstTypes, lstProducts)
+    # print("Types:", lstTypes)
+    # print("Products:", lstProducts)
+
+    return render(request, "index.html", {"UDTime" : UDTime, "lstTypes" : lstTypes, "lstProducts" : lstProducts})
 
 
 def index(request):
@@ -65,8 +72,8 @@ def login(request):
             # return HttpResponse("login Failed")
             return render(request, "login.html", {"error_msg": "login failed"})
 
-def outputers(request):
-    GroupID = request.GET.get('type')   #"2ETC02"
+def outputers(request,GroupID='2ETC02'):
+    #GroupID = request.GET.get('type')   #"2ETC02"
     if not GroupID:
         return HttpResponse("type require")
 
@@ -110,13 +117,21 @@ def outputers(request):
         data_list += [my_list]
 
     #print(data_list)
-    return render(request, "outputers.html", {"Header_list" : Header_list, "data_list" : data_list})
+
+    SysDatas = models.SystemSet.objects.filter(DataName='UpdateDateTime')
+    for obj in SysDatas:
+        UDTime = obj.StrData
 
 
-def runningtables(request):
-    tID = request.GET.get('type')   #"2ETC02"
+
+    return render(request, "outputers.html", {"Header_list" : Header_list, "data_list" : data_list, "UDTime" : UDTime})
+
+
+def runningtables(request,tID='2ETC02'):
+    #tID = request.GET.get('type')   #"2ETC02"
     pID = request.GET.get('part')    #"0244D02837P02"
     WipData = request.GET.get('wip')    #True
+
 
     if not tID:
         return HttpResponse("type require")
@@ -201,101 +216,40 @@ def runningtables(request):
 
         data_list += [hlist]
 
+    SysDatas = models.SystemSet.objects.filter(DataName='UpdateDateTime')
+    for obj in SysDatas:
+        UDTime = obj.StrData
+
+    return render(request, "runningtables.html", {"Header_list" : Header_list, "data_list" : data_list, "UDTime" : UDTime})
 
 
-    return render(request, "runningtables.html", {"Header_list" : Header_list, "data_list" : data_list})
+def GetSelectLists(lstTypes,lstProducts):
+    lstTemp = models.Titles.objects.values('TypeID').order_by('TypeID').distinct()
+    for t in lstTemp:
+        strTemp = t["TypeID"]
+        lstTypes += [strTemp]
+        lstTemp2 = models.Titles.objects.filter(TypeID=strTemp).values('ProductID').order_by('ProductID').distinct()
+        lstTemp3 = []
+        for p in lstTemp2:
+            lstTemp3 += [p["ProductID"]]
+        lstProducts+=[lstTemp3]
 
-def index_Running(request):
-    tID = request.GET.get('type')   #"2ETC02"
-    pID = request.GET.get('part')    #"0244D02837P02"
-    WipData = request.GET.get('wip')    #True
-
-    if not tID:
-        return HttpResponse("type require")
-    print("TypeID:" + tID)
-    if not pID:
-        pID=""
-    if not WipData:
-        WipData=True
-    else:
-        WipData=False
-    print("PartID:" + pID)
-    if WipData:
-        print("WipData:True")
-    else:
-        print("WipData:False")
-
-    Header_list = []
-    data_list = []
-
-    #PartID="0244D02837P02"
-    if (len(pID) <= 0):
-        Product_list = LocalFunctions.GetProductList(tID)
-    else:
-        Product_list = LocalFunctions.GetPartList(tID, pID)
-
-    if Product_list.count()<=0:
-        return HttpResponse("Product_list count=0")
-
-    if(len(pID)<=0):
-        data_first = models.runningtables.objects.filter(ProductID=Product_list[0].ProductID)
-    else:
-        data_first = models.runningtables.objects.filter(ProductID=Product_list[0].Members)
-
-    nIndex = data_first.count()
-    hlist = []
-    for obj in data_first:
-        hlist += [str(nIndex)]
-        nIndex -= 1
-    hlist.reverse()
-    Header_list += [hlist]
-
-    hlist = []
-    for obj in data_first:
-        hlist += [obj.ProcessID]
-    hlist.reverse()
-    Header_list += [hlist]
-
-    hlist = []
-    for obj in data_first:
-        ProcessName = models.Process.objects.filter(ProcessID=obj.ProcessID)
-        for h in ProcessName:
-            hlist += [h.CName]
-            break
-    hlist.reverse()
-    Header_list += [hlist]
-
-    #print(Header_list)
-
-    for obj in Product_list:
-        hlist = []
-        if (len(pID) <= 0):
-            hlist += [obj.ProductID]
-            temp_list = models.Product.objects.filter(ProductID=obj.ProductID)
-        else:
-            hlist += [obj.Members]
-            temp_list = models.Part.objects.filter(PartID=obj.Members)
-
-        for name in temp_list:
-            hlist += [name.CName]
-            break
-
-        if (len(pID) <= 0):
-            temp_list = models.runningtables.objects.filter(TypeID=tID, ProductID=obj.ProductID)
-        else:
-            temp_list = models.runningtables.objects.filter(GroupID=tID, ProductID=obj.Members)
-
-        for v in reversed(temp_list):
-            if WipData:
-                hlist += [v.TargetCount]
-            else:
-                hlist += [v.WipCount]
-
-        data_list += [hlist]
-
-
-
-    return render(request, "index_Running.html", {"Header_list" : Header_list, "data_list" : data_list})
+def GetSelectLists(id,lstTypes,lstProducts):
+    index=0
+    lstTemp = models.Titles.objects.values('TypeID').order_by('TypeID').distinct()
+    for t in lstTemp:
+        strTemp = t["TypeID"]
+        lstTypes += [strTemp]
+        if index==id:
+            lstTemp2 = models.Titles.objects.filter(TypeID=strTemp).values('ProductID').order_by('ProductID').distinct()
+            lstTemp3 = []
+            for p in lstTemp2:
+                lstTemp3 += [p["ProductID"]]
+            lstProducts+=lstTemp3
+        index=index+1
+def GetPartLists(TypeName,pID):
+    lstTypes = models.Titles.objects.filter(TypeID = TypeName, ProductID=pID).values('Members').order_by('Members').distinct()
+    return lstTypes
 
 """
 class TypeModeForm(forms.ModelForm):
