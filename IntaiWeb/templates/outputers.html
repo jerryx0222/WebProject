@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block myMenu %}
-    <a>O1</a>
+    {% include 'menuOutput.html' %}
 {% endblock %}
 
 {% block content %}
@@ -48,5 +48,6 @@
           </tbody>
 
         </table>
+        &nbsp;
     {% endfor %}
 {% endblock %}

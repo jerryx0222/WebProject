@@ -1,4 +1,4 @@
-<!-- menu.html -->
+<!-- menuWip.html -->
 
 <a>類別:
     <select id="type-list" onchange="changeType(this.value)">
@@ -26,17 +26,6 @@
     </select>
 </a>
 &nbsp;
-<a>庫存
-    {% if Wip_select == "1" %}
-    <input type="radio" id="wip1" name="bWip" checked onchange="changeWip1()"> 是
-    <input type="radio" id="wip2" name="bWip" onchange="changeWip0()"> 否
-    {% else %}
-    <input type="radio" id="wip3" name="bWip" onchange="changeWip1()"> 是
-    <input type="radio" id="wip4" name="bWip" checked onchange="changeWip0()"> 否
-    {% endif %}
-
-</a>
-&nbsp;
 
 <script>
 function changeType(type)
@@ -51,29 +40,6 @@ function changeProduct(pID)
     var newUrl = window.location.href.split('?')[0] + '?type=' + type + '&part=' + pID + '&wip=1';
     window.location.href = newUrl;
 }
-
-function changeWip1()
-{
-    var type = document.getElementById("type-list").value;
-    var part = document.getElementById("product-list").value;
-    var newUrl = window.location.href.split('?')[0] + '?type=' + type + '&part=' + part;
-    newUrl += '&wip=1';
-
-    window.location.href = newUrl;
-}
-
-function changeWip0()
-{
-    var type = document.getElementById("type-list").value;
-    var part = document.getElementById("product-list").value;
-    var newUrl = window.location.href.split('?')[0] + '?type=' + type + '&part=' + part;
-    newUrl += '&wip=0';
-
-    window.location.href = newUrl;
-}
-
-
-
 
 
 </script>

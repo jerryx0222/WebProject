@@ -24,11 +24,11 @@ urlpatterns = [
     #path('something/', views.something),
     #path('login/', views.login),
     path('runningtables/', views.runningtables),
-    path('runningtables/<str:type>/', views.runningtables),
+    path('TargetWip/', views.TargetWip),
     path('outputers/', views.outputers),
-    path('outputers/<str:type>/', views.outputers),
+
     #path('TypeList/', views.TypeList),
     #path('TypeList/<str:gId>/', views.TypeSelect),
     path('', views.homepage),
-    path('admin/',admin.site.urls),
+    path('admin/', admin.site.urls),
 ]

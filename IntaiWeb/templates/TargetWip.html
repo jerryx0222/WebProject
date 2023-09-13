@@ -1,0 +1,36 @@
+<!-- TargetWip.html -->
+{% extends 'base.html' %}
+{% block title %} TargetWip {% endblock %}
+{% block headmessage %}
+
+{% endblock %}
+
+{% block myMenu %}
+    {% include 'menuWip.html' %}
+{% endblock %}
+
+
+
+{% block content %}
+    <table id="tb1" border="3">
+      <thred>
+          <tr>
+          {% for item in Header_list %}
+            <td>{{item}}</td>
+          {% endfor %}
+          </tr>
+      </thred>
+
+      <tbody>
+        <tr>
+          {% for obj_list in data_list %}
+            <tr>
+            {% for item in obj_list %}
+            <td>{{item}}</td>
+            {% endfor %}
+            </tr>
+          {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+{% endblock %}

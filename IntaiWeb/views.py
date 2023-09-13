@@ -12,13 +12,13 @@ def homepage(request):
     for obj in SysDatas:
         UDTime=obj.StrData
 
-    lstTypes = []
-    lstProducts = []
-    GetSelectLists(0,lstTypes, lstProducts)
+    #lstTypes = []
+    #lstProducts = []
+    #GetSelectLists(0, lstTypes, lstProducts)
     # print("Types:", lstTypes)
     # print("Products:", lstProducts)
 
-    return render(request, "index.html", {"UDTime" : UDTime, "lstTypes" : lstTypes, "lstProducts" : lstProducts})
+    return render(request, "index.html", {"UDTime": UDTime})
 
 
 def index(request):
@@ -72,16 +72,22 @@ def login(request):
             # return HttpResponse("login Failed")
             return render(request, "login.html", {"error_msg": "login failed"})
 
-def outputers(request,GroupID='2ETC02'):
-    #GroupID = request.GET.get('type')   #"2ETC02"
-    if not GroupID:
-        return HttpResponse("type require")
+def outputers(request):
+    tID = request.GET.get('type')  # "2ETC02"
+
+    SysDatas = models.SystemSet.objects.filter(DataName='UpdateDateTime')
+    for obj in SysDatas:
+        UDTime = obj.StrData
+
+    if not tID:
+        return render(request, "outputers.html", {"UDTime": UDTime,
+                                                  "Type_list": GetTypesLists()})
 
     Header_list=['日期', '產品', '輸出', '庫存', '比率', '差異']
     date_list = []
     data_list = []
 
-    temp_list = models.Shiptable.objects.filter(TypeID=GroupID)
+    temp_list = models.Shiptable.objects.filter(TypeID=tID)
     for obj in temp_list:
         bFind=False
         for date in date_list:
@@ -95,7 +101,7 @@ def outputers(request,GroupID='2ETC02'):
 
     for obj in date_list:
         my_list = []
-        temp_list = models.Shiptable.objects.filter(TypeID=GroupID, ShipDate=obj)
+        temp_list = models.Shiptable.objects.filter(TypeID=tID, ShipDate=obj)
         index=1
         for info in temp_list:
             info_list = [index]
@@ -124,43 +130,19 @@ def outputers(request,GroupID='2ETC02'):
 
 
 
-    return render(request, "outputers.html", {"Header_list" : Header_list, "data_list" : data_list, "UDTime" : UDTime})
+    return render(request, "outputers.html", {"UDTime": UDTime,
+                                              "Type_list": GetTypesLists(),
+                                              "Type_select": tID,
+                                              "Header_list": Header_list,
+                                              "data_list": data_list})
 
 
-def runningtables(request,tID='2ETC02'):
-    #tID = request.GET.get('type')   #"2ETC02"
-    pID = request.GET.get('part')    #"0244D02837P02"
-    WipData = request.GET.get('wip')    #True
 
 
-    if not tID:
-        return HttpResponse("type require")
-    print("TypeID:" + tID)
-    if not pID:
-        pID=""
-    if not WipData:
-        WipData=True
-    else:
-        WipData=False
-    print("PartID:" + pID)
-    if WipData:
-        print("WipData:True")
-    else:
-        print("WipData:False")
-
+def GetHeaderList(bProduct, Product_list):
     Header_list = []
-    data_list = []
 
-    #PartID="0244D02837P02"
-    if (len(pID) <= 0):
-        Product_list = LocalFunctions.GetProductList(tID)
-    else:
-        Product_list = LocalFunctions.GetPartList(tID, pID)
-
-    if Product_list.count()<=0:
-        return HttpResponse("Product_list count=0")
-
-    if(len(pID)<=0):
+    if (bProduct):
         data_first = models.runningtables.objects.filter(ProductID=Product_list[0].ProductID)
     else:
         data_first = models.runningtables.objects.filter(ProductID=Product_list[0].Members)
@@ -188,51 +170,265 @@ def runningtables(request,tID='2ETC02'):
     hlist.reverse()
     Header_list += [hlist]
 
-    #print(Header_list)
+    return Header_list
+
+def GetDataList(tID, wipID,bProduct,Product_list):
+    data_list = []
 
     for obj in Product_list:
         hlist = []
-        if (len(pID) <= 0):
+        if (bProduct):
             hlist += [obj.ProductID]
             temp_list = models.Product.objects.filter(ProductID=obj.ProductID)
         else:
             hlist += [obj.Members]
             temp_list = models.Part.objects.filter(PartID=obj.Members)
+        #print(temp_list)
 
         for name in temp_list:
             hlist += [name.CName]
             break
 
-        if (len(pID) <= 0):
+        if (bProduct):
             temp_list = models.runningtables.objects.filter(TypeID=tID, ProductID=obj.ProductID)
         else:
-            temp_list = models.runningtables.objects.filter(GroupID=tID, ProductID=obj.Members)
+            temp_list = models.runningtables.objects.filter(TypeID=tID, ProductID=obj.Members)
 
         for v in reversed(temp_list):
-            if WipData:
-                hlist += [v.TargetCount]
-            else:
+            if (wipID != "1"):
                 hlist += [v.WipCount]
+            else:
+                hlist += [v.TargetCount]
+
 
         data_list += [hlist]
+
+    return data_list
+
+
+def GetTargetHeaderList(bProduct, Product_list):
+    Header_list = []
+
+    if (bProduct):
+        data_first = models.runningtables.objects.filter(ProductID=Product_list[0].ProductID)
+    else:
+        data_first = models.runningtables.objects.filter(ProductID=Product_list[0].Members)
+
+    for obj in data_first:
+        ProcessName = models.Process.objects.filter(ProcessID=obj.ProcessID)
+        for h in ProcessName:
+            Header_list += [h.CName]
+            break
+    Header_list+= ["製程"]
+    Header_list.reverse()
+
+    return Header_list
+def GetTargetDataList(tID, bProduct,Product_list):
+    data_list = []
+
+    for index,obj in enumerate(Product_list):
+
+        if (bProduct):
+            temp_list = models.runningtables.objects.filter(TypeID=tID, ProductID=obj.ProductID)
+        else:
+            temp_list = models.runningtables.objects.filter(TypeID=tID, ProductID=obj.Members)
+
+        if index == 0:
+            hlist = []
+            hlist += ["庫存"]
+            for v in reversed(temp_list):
+                hlist += [v.TargetCount]
+            data_list += [hlist]
+        else:
+            for index2, v in enumerate(reversed(temp_list)):
+                data_list[0][index2+1] += v.TargetCount
+
+        if index == 0:
+            hlist = []
+            hlist += ["目標"]
+            for v in reversed(temp_list):
+                hlist += [v.SumCount]
+            data_list += [hlist]
+        else:
+            for index2, v in enumerate(reversed(temp_list)):
+                data_list[1][index2+1] += v.SumCount
+
+        if index == 0:
+            hlist = []
+            hlist += ["累計"]
+            for v in reversed(temp_list):
+                hlist += [v.WipCount]
+            data_list += [hlist]
+        else:
+            for index2, v in enumerate(reversed(temp_list)):
+                data_list[2][index2+1] += v.WipCount
+
+    print(data_list)
+
+    return data_list
+
+def TargetWip(request):
+    tID = request.GET.get('type')  # "2ETC02"
+    pID = request.GET.get('part')  # "0244D02837P02"
 
     SysDatas = models.SystemSet.objects.filter(DataName='UpdateDateTime')
     for obj in SysDatas:
         UDTime = obj.StrData
 
-    return render(request, "runningtables.html", {"Header_list" : Header_list, "data_list" : data_list, "UDTime" : UDTime})
+    if not tID:
+        return render(request, "TargetWip.html", {"UDTime": UDTime,
+                                                      "Type_list": GetTypesLists()})
+    print("TypeID:" + tID)
+
+    if not pID:
+        return render(request, "TargetWip.html", {"UDTime": UDTime,
+                                                      "Type_list": GetTypesLists(),
+                                                      "Type_select": tID,
+                                                      "Product_list": GetSelectTypeLists(tID)})
+    print("ProductID:" + pID)
+
+    bProduct = (models.Product.objects.filter(ProductID=pID).count() > 0)
+    if (bProduct):
+        Product_list = LocalFunctions.GetProductList(tID)
+    else:
+        Product_list = LocalFunctions.GetPartList(tID, pID)
+    if Product_list.count() <= 0:
+        return HttpResponse("Product_list count=0")
+
+    Header_list = GetTargetHeaderList(bProduct, Product_list)
+    data_list = GetTargetDataList(tID, bProduct, Product_list)
+    print("Header_list:" + str(len(Header_list)) + ",data_list:" + str(len(data_list)))
+
+    return render(request, "TargetWip.html", {"UDTime": UDTime,
+                                                  "Type_list": GetTypesLists(),
+                                                  "Type_select": tID,
+                                                  "Product_list": GetSelectTypeLists(tID),
+                                                  "Product_select": pID,
+                                                  "Header_list": Header_list,
+                                                  "data_list": data_list})
 
 
-def GetSelectLists(lstTypes,lstProducts):
+def runningtables(request):
+    tID = request.GET.get('type')   #"2ETC02"
+    pID = request.GET.get('part')    #"0244D02837P02"
+    wipID = request.GET.get('wip')    # 1 or 0
+
+    tID2 = request.GET.get('type2')  # "2ETC02"
+    pID2 = request.GET.get('part2')  # "0244D02837P02"
+    wipID2 = request.GET.get('wip2')  # 1 or 0
+
+    SysDatas = models.SystemSet.objects.filter(DataName='UpdateDateTime')
+    for obj in SysDatas:
+        UDTime = obj.StrData
+
+    if not tID:
+        return render(request, "runningtables.html", {"UDTime": UDTime,
+                                                      "Type_list": GetTypesLists()})
+    print("TypeID:" + tID)
+
+    if not tID2:
+        tID2=""
+    print ("Type_select2:" + tID2)
+
+    ProductList2=GetSelectTypeLists(tID2)
+    print("Product_list2:" + " ".join(ProductList2))
+
+
+    if not pID:
+        return render(request, "runningtables.html", {"UDTime": UDTime,
+                                                      "Type_list": GetTypesLists(),
+                                                      "Type_select": tID,
+                                                      "Product_list": GetSelectTypeLists(tID),
+                                                      "Type_select2": tID2,
+                                                      "Product_list2": ProductList2})
+    print("ProductID:" + pID)
+
+    if not wipID:
+        wipID = "1"
+    print("WipData:" + wipID)
+
+    if not wipID2:
+        wipID2 = "1"
+    print("WipData2:" + wipID2)
+
+    #PartID="0244D02837P02"
+
+    bProduct = (models.Product.objects.filter(ProductID=pID).count() > 0)
+
+    if (bProduct):
+        Product_list = LocalFunctions.GetProductList(tID)
+    else:
+        Product_list = LocalFunctions.GetPartList(tID, pID)
+
+    if Product_list.count() <= 0:
+        return HttpResponse("Product_list count=0")
+
+    Header_list = GetHeaderList(bProduct, Product_list)
+    data_list = GetDataList(tID,wipID,bProduct,Product_list)
+    print("Header_list:" + str(len(Header_list)) + ",data_list:" + str(len(data_list)))
+
+    if(len(ProductList2) >0):
+        bProduct2 = (models.Product.objects.filter(ProductID=pID2).count() > 0)
+        if (bProduct2):
+            Product_list2 = LocalFunctions.GetProductList(tID2)
+        else:
+            Product_list2 = LocalFunctions.GetPartList(tID2, pID2)
+        if(len(Product_list2)>0):
+            Header_list2 = GetHeaderList(bProduct2, Product_list2)
+            data_list2 = GetDataList(tID2, wipID2, bProduct2, Product_list2)
+            print("Header_list2:" + str(len(Header_list2)) + ",data_list2:" + str(len(data_list2)))
+
+            return render(request, "runningtables.html", {"UDTime": UDTime,
+                                                          "Type_list": GetTypesLists(),
+
+                                                          "Type_select": tID,
+                                                          "Product_list": GetSelectTypeLists(tID),
+                                                          "Product_select": pID,
+                                                          "Wip_select": wipID,
+                                                          "Header_list": Header_list,
+                                                          "data_list": data_list,
+
+                                                          "Type_select2": tID2,
+                                                          "Product_list2": ProductList2,
+                                                          "Product_select2": pID2,
+                                                          "Wip_select2": wipID2,
+                                                          "Header_list2": Header_list2,
+                                                          "data_list2": data_list2})
+
+
+    return render(request, "runningtables.html", {"UDTime": UDTime,
+                                                  "Type_list": GetTypesLists(),
+                                                  "Type_select": tID,
+                                                  "Product_list": GetSelectTypeLists(tID),
+                                                  "Product_select": pID,
+                                                  "Wip_select": wipID,
+                                                  "Header_list": Header_list,
+                                                  "data_list": data_list,
+                                                  "Type_select2": tID2,
+                                                  "Product_list2": ProductList2})
+
+
+
+def GetTypesLists():
+    lstTypes = []
     lstTemp = models.Titles.objects.values('TypeID').order_by('TypeID').distinct()
     for t in lstTemp:
         strTemp = t["TypeID"]
         lstTypes += [strTemp]
-        lstTemp2 = models.Titles.objects.filter(TypeID=strTemp).values('ProductID').order_by('ProductID').distinct()
-        lstTemp3 = []
-        for p in lstTemp2:
-            lstTemp3 += [p["ProductID"]]
-        lstProducts+=[lstTemp3]
+    return lstTypes
+
+def GetSelectTypeLists(type):
+    Product_list = []
+    lstTemp = models.Titles.objects.values('TypeID').order_by('TypeID').distinct()
+    for t in lstTemp:
+        strTemp = t["TypeID"]
+        if(strTemp==type):
+            lstTemp2 = models.Titles.objects.filter(TypeID=strTemp).values('ProductID').order_by('ProductID').distinct()
+            lstTemp3 = []
+            for p in lstTemp2:
+                lstTemp3 += [p["ProductID"]]
+            Product_list+=lstTemp3
+    return Product_list
 
 def GetSelectLists(id,lstTypes,lstProducts):
     index=0

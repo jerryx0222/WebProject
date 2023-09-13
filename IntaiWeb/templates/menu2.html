@@ -1,0 +1,103 @@
+<!-- menu2.html -->
+
+<a>類別2:
+    <select id="type-list2" onchange="changeType2(this.value)">
+        <option>請選擇類別</option>
+        {% for item in Type_list %}
+            {% if Type_select2 == item  %}
+                <option value='{{ item }}' selected> {{ item }} </option>
+            {% else %}
+                <option value='{{ item }}'> {{ item }} </option>
+            {% endif %}
+        {% endfor %}
+    </select>
+</a>
+&nbsp;
+<a>產品2:
+    <select id="product-list2" onchange="changeProduct2(this.value)">
+        <option>請選擇產品</option>
+        {% for item in Product_list2 %}
+            {% if Product_select2 == item  %}
+                <option value='{{ item }}' selected> {{ item }} </option>
+            {% else %}
+                <option value='{{ item }}'> {{ item }} </option>
+            {% endif %}
+        {% endfor %}
+    </select>
+</a>
+&nbsp;
+<a>庫存
+    {% if Wip_select2 == "1" %}
+    <input type="radio" id="wip5" name="bWip2" checked onchange="changeWip3()"> 是
+    <input type="radio" id="wip6" name="bWip2" onchange="changeWip2()"> 否
+    {% else %}
+    <input type="radio" id="wip7" name="bWip2" onchange="changeWip3()"> 是
+    <input type="radio" id="wip8" name="bWip2" checked onchange="changeWip2()"> 否
+    {% endif %}
+</a>
+&nbsp;
+
+<script>
+
+function changeType2(type2)
+{
+    var newUrl = GetUrl1();
+    newUrl += '&type2=';
+    newUrl += type2;
+    window.location.href = newUrl;
+}
+
+function changeProduct2(part2)
+{
+    window.location.href = GetUrl2(part2);
+}
+
+function changeWip2()
+{
+    var part2 = document.getElementById("product-list2").value;
+    var newUrl = GetUrl2(part2);
+    newUrl += '&wip2=0';
+    window.location.href = newUrl;
+}
+
+function changeWip3()
+{
+    var part2 = document.getElementById("product-list2").value;
+    var newUrl = GetUrl2(part2);
+    newUrl += '&wip2=1';
+    window.location.href = newUrl;
+}
+
+function GetUrl2(part2)
+{
+    var newUrl = GetUrl1();
+    var type2 = document.getElementById("type-list2").value;
+    newUrl += '&type2=';
+    newUrl += type2;
+    newUrl += '&part2=';
+    newUrl += part2;
+    return newUrl;
+}
+
+function GetUrl1()
+{
+    var type = document.getElementById("type-list").value;
+    var part = document.getElementById("product-list").value;
+    var newUrl = window.location.href.split('?')[0] + '?type=' + type + '&part=' + part;
+
+    var eWip1=document.getElementById("wip1");
+    var eWip3=document.getElementById("wip3");
+    if(eWip1)
+        if(eWip1.checked)
+            newUrl += '&wip=1';
+        else
+            newUrl += '&wip=0';
+    else if(eWip3)
+        if(eWip3.checked)
+            newUrl += '&wip=1';
+        else
+            newUrl += '&wip=0';
+    return newUrl;
+}
+
+</script>

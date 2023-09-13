@@ -8,13 +8,43 @@
         {% block title %} {% endblock %}
     </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+
+    <style>
+      th, td
+      {
+        border: 2px solid black;
+        padding: 8px;
+        text-align: center;
+      }
+      th
+      {
+        background-color: #f2f2f2;
+      }
+      tr:nth-child(odd) td
+      {
+        background-color: #f9f9f9;
+      }
+      td.special-cell
+      {
+        border: 3px solid red;
+      }
+      td.negative
+      {
+        color: red;
+      }
+    </style>
 </head>
 <body>
-    <div class = "container-fluid">
-        {% include 'header.html' %}<BR>
-        {% block myMenu %} {% endblock %}<BR><BR>
-        {% block content %} {% endblock %}
 
+    <div class = "container-fluid">
+        {% include 'header.html' %}
+        {% block myMenu %} {% endblock %}<BR>
+        <hr>
+        {% block content %} {% endblock %}<BR>
+        <hr>
+        {% block myMenu2 %} {% endblock %}<BR>
+        <hr>
+        {% block content2 %} {% endblock %}<BR>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>

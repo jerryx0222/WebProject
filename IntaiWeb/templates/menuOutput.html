@@ -1,0 +1,25 @@
+<!-- menuOutput.html -->
+
+<a>類別:
+    <select id="type-list" onchange="changeType(this.value)">
+        <option>請選擇類別</option>
+        {% for item in Type_list %}
+            {% if Type_select == item  %}
+                <option value='{{ item }}' selected> {{ item }} </option>
+            {% else %}
+                <option value='{{ item }}'> {{ item }} </option>
+            {% endif %}
+        {% endfor %}
+    </select>
+</a>
+&nbsp;
+
+<script>
+function changeType(type)
+{
+    var newUrl = window.location.href.split('?')[0] + '?type=' + type;
+    window.location.href = newUrl;
+}
+
+
+</script>

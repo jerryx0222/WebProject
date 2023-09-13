@@ -9,8 +9,14 @@
     {% include 'menu.html' %}
 {% endblock %}
 
+{% block myMenu2 %}
+    {% if data_list %}
+    {% include 'menu2.html' %}
+    {% endif %}
+{% endblock %}
+
 {% block content %}
-    <table border="1">
+    <table id="tb1" border="3">
       <thred>
           {% for obj_list in Header_list %}
         <tr>
@@ -28,7 +34,43 @@
           {% for obj_list in data_list %}
             <tr>
             {% for item in obj_list %}
-            <td>{{item}}</td>
+              {% if item < 0 %}
+                <td class="negative">{{item}}</td>
+              {% else %}
+                <td>{{item}}</td>
+              {% endif %}
+            {% endfor %}
+            </tr>
+          {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+{% endblock %}
+
+{% block content2 %}
+    <table id="tb2" border="3">
+      <thred>
+          {% for obj_list in Header_list2 %}
+        <tr>
+          <th></th>
+          <th></th>
+            {% for item in obj_list %}
+            <th>{{item}}</th>
+            {% endfor %}
+        </tr>
+          {% endfor %}
+      </thred>
+
+      <tbody>
+        <tr>
+          {% for obj_list in data_list2 %}
+            <tr>
+            {% for item in obj_list %}
+            {% if item < 0 %}
+                <td class="negative">{{item}}</td>
+              {% else %}
+                <td>{{item}}</td>
+              {% endif %}
             {% endfor %}
             </tr>
           {% endfor %}
