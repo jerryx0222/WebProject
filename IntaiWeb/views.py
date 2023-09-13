@@ -3,6 +3,7 @@ from IntaiWeb import models
 from IntaiWeb import LocalFunctions
 from django import forms
 from datetime import datetime
+import random
 
 
 # Create your views here.
@@ -263,7 +264,7 @@ def GetTargetDataList(tID, bProduct,Product_list):
             for index2, v in enumerate(reversed(temp_list)):
                 data_list[2][index2+1] += v.WipCount
 
-    print(data_list)
+    #print(data_list)
 
     return data_list
 
@@ -297,15 +298,42 @@ def TargetWip(request):
 
     Header_list = GetTargetHeaderList(bProduct, Product_list)
     data_list = GetTargetDataList(tID, bProduct, Product_list)
-    print("Header_list:" + str(len(Header_list)) + ",data_list:" + str(len(data_list)))
+    #print("Header_list:" + str(len(Header_list)) + ",data_list:" + str(len(data_list)))
+
+    Label_list = []
+    for index, item in enumerate(Header_list):
+        if index != 0:
+            Label_list += [item]
+    #print(Label_list)
+
+    DatasPlot1 = []
+    for index, item in enumerate(data_list[0]):
+        if index != 0:
+            DatasPlot1 += [item]
+
+    DatasPlot2 = []
+    for index, item in enumerate(data_list[1]):
+        if index != 0:
+            DatasPlot2 += [item]
+
+    DatasPlot3 = []
+    for index, item in enumerate(data_list[2]):
+        if index != 0:
+            DatasPlot3 += [item]
+    #print(DatasPlot)
+
 
     return render(request, "TargetWip.html", {"UDTime": UDTime,
-                                                  "Type_list": GetTypesLists(),
-                                                  "Type_select": tID,
-                                                  "Product_list": GetSelectTypeLists(tID),
-                                                  "Product_select": pID,
-                                                  "Header_list": Header_list,
-                                                  "data_list": data_list})
+                                              "Type_list": GetTypesLists(),
+                                              "Type_select": tID,
+                                              "Product_list": GetSelectTypeLists(tID),
+                                              "Product_select": pID,
+                                              "Header_list": Header_list,
+                                              "data_list": data_list,
+                                              "Label_list": Label_list,
+                                              "DatasPlot1": DatasPlot1,
+                                              "DatasPlot2": DatasPlot2,
+                                              "DatasPlot3": DatasPlot3})
 
 
 def runningtables(request):

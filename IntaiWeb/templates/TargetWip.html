@@ -12,6 +12,11 @@
 
 
 {% block content %}
+
+    <div id="chartContainer" style="height: 400px;">
+        <canvas id="histogramCanvas"></canvas>
+    </div>
+
     <table id="tb1" border="3">
       <thred>
           <tr>
@@ -33,4 +38,52 @@
         </tr>
       </tbody>
     </table>
+
+     <script>
+        const  ctx = document.getElementById('histogramCanvas').getContext('2d');
+
+        var chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {{ Label_list|safe }},
+                datasets: [
+                     {
+                        label: '庫存',
+                        data: {{ DatasPlot1|safe }},
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                    },
+                    {
+                        label: '目標',
+                        data: {{ DatasPlot2|safe }},
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                    },
+                    {
+                        label: '累計',
+                        data: {{ DatasPlot3|safe }},
+                        backgroundColor: 'rgba(0, 0, 160, 0.2)',
+                        borderColor: 'rgba(128, 128, 255, 1)',
+                        borderWidth: 1,
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+
+
+
+
+    </script>
+
+
 {% endblock %}
