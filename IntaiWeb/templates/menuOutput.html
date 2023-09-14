@@ -1,4 +1,5 @@
 <!-- menuOutput.html -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.10/xlsx.full.min.js"></script>
 
 <a>類別:
     <select id="type-list" onchange="changeType(this.value)">
@@ -14,12 +15,13 @@
 </a>
 &nbsp;
 
+
 <script>
+
 function changeType(type)
 {
     var newUrl = window.location.href.split('?')[0] + '?type=' + type;
     window.location.href = newUrl;
 }
-
 
 </script>

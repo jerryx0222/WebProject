@@ -1,12 +1,12 @@
-<!-- TargetWip.html -->
+<!-- TargetWip1.html -->
 {% extends 'base.html' %}
-{% block title %} TargetWip {% endblock %}
+{% block title %} TargetWip1 {% endblock %}
 {% block headmessage %}
 
 {% endblock %}
 
 {% block myMenu %}
-    {% include 'menuWip.html' %}
+    {% include 'menuWip1.html' %}
 {% endblock %}
 
 
@@ -42,6 +42,24 @@
             <tr>
               {% for obj_list in data_list %}
                 <tr>
+                {% if forloop.counter == 2 %}
+                    {% for item in obj_list %}
+                        {% if forloop.counter == 1 %}
+                            <td>
+                                {{item}}
+                            </td>
+                        {% else %}
+                            <td class="editable">
+                                <input type="text"
+                                       style="width: 100px; text-align: center;"
+                                       id="myInput"
+                                       name="sumcount"
+                                       onkeydown="keepValue(event)"
+                                       value="{{item}}" />
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
                     <tr>
                     {% for item in obj_list %}
                         <td>
@@ -49,10 +67,13 @@
                         </td>
                     {% endfor %}
                     </tr>
+                {% endif %}
                 </tr>
               {% endfor %}
           </tbody>
         </table>
+        &nbsp;
+        <button type="submit" onclick="saveData()">儲存</button>
         &nbsp;
     </form>
 

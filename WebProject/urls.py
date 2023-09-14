@@ -19,16 +19,13 @@ from django.urls import path
 from IntaiWeb import views
 
 urlpatterns = [
-    #path('admin/', admin.site.urls),
-    #path('index/', views.index),
-    #path('something/', views.something),
-    #path('login/', views.login),
     path('runningtables/', views.runningtables),
-    path('TargetWip/', views.TargetWip),
+    path('TargetWip/', views.TargetWip, name='TargetWip'),
+    path('TargetWip1/', views.TargetWip1, name='TargetWip1'),
     path('outputers/', views.outputers),
 
-    #path('TypeList/', views.TypeList),
-    #path('TypeList/<str:gId>/', views.TypeSelect),
+
     path('', views.homepage),
     path('admin/', admin.site.urls),
+
 ]
