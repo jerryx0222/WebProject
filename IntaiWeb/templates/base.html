@@ -9,6 +9,7 @@
     </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/linways/table-to-excel@v1.0.4/dist/tableToExcel.js"></script>
     <style>
       th, td
       {
@@ -52,3 +53,45 @@
 
 </body>
 </html>
+
+
+<script>
+    function convertTableToXLSX(tableId, fname)
+    {
+        const table = document.getElementById(tableId);
+        const filename = fname + ".xlsx";
+        TableToExcel.convert(table, {
+            name: filename,
+            sheet: {
+                name: "Sheet 1"
+            }
+        });
+    }
+
+    function convertTableToCSV(tableId, filename)
+    {
+        var table = document.getElementById(tableId);
+        var rows = table.querySelectorAll('tr');
+        var csvContent = [];
+
+        for (var i = 0; i < rows.length; i++) {
+            var row = [], cols = rows[i].querySelectorAll('td, th');
+
+            for (var j = 0; j < cols.length; j++) {
+                row.push(cols[j].textContent);
+            }
+
+            csvContent.push(row.join(','));
+        }
+
+        var csvString = csvContent.join('\n');
+        var blob = new Blob([csvString], { type: 'text/csv' });
+        var link = document.createElement('a');
+
+        link.setAttribute('href', window.URL.createObjectURL(blob));
+        link.setAttribute('download', filename + '.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>

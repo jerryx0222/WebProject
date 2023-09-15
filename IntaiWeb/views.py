@@ -9,6 +9,7 @@ from django import forms
 from datetime import datetime
 import random
 import cgi
+import time
 
 # Create your views here.
 
@@ -44,25 +45,6 @@ def index(request):
                    'n4': data_list})
 
 
-def something(request):
-    print(request.method)  # GET
-
-    print(request.GET)
-
-    print(request.POST)
-
-    #models.UserInfo.objects.create(name="jack", password="1234")
-
-    product_list = models.Shiptable.objects.all()
-    for obj in product_list:
-        print(obj.TypeID)
-
-
-
-    #UserInfo.object.create(name="jackson", password='1234')
-
-    return HttpResponse("fedback information")
-
 
 def login(request):
     if request.method == "GET":
@@ -77,50 +59,109 @@ def login(request):
             # return HttpResponse("login Failed")
             return render(request, "login.html", {"error_msg": "login failed"})
 
+def DataImport(request):
+    SysDatas = models.SystemSet.objects.get(DataName='UpdateDateTime')
+    if(SysDatas):
+        UDTime = SysDatas.StrData
+
+    filePath = "C:/Users/MyUser/Downloads/"
+    SysDatas = models.SystemSet.objects.get(DataName='UpdateFilePath')
+    if (SysDatas):
+        filePath = SysDatas.StrData
+
+    today_date = datetime.today()
+    today_date_str = today_date.strftime("%Y/%m/%d")
+
+    Header_list = ['Date', 'Type', 'Mes', 'Count', 'Product']
+    data_list = []
+    data_list += [Header_list]
+
+    for p1 in models.Product.objects.all():
+        selData = models.Shiptable.objects.filter(ProductID=p1.ProductID)
+        if(selData.count()<=0):
+            new_ship = models.Shiptable.objects.create(ProductID=p1.ProductID, ShipDate=today_date_str, TypeID=p1.TypeID, TargetCount=0)
+            new_ship.save()
+
+    DataOutList = models.Shiptable.objects.order_by('TypeID', 'ShipDate', 'ProductID')
+    for obj in DataOutList:
+        ProductSelect = models.Product.objects.get(ProductID=obj.ProductID)
+        Temp_list = []
+        if (ProductSelect):
+            Temp_list += [obj.ShipDate]
+            Temp_list += [obj.TypeID]
+            Temp_list += [obj.ProductID]
+            Temp_list += [str(obj.TargetCount)]
+            Temp_list += [ProductSelect.CName]
+            #print("Date:" + obj.ShipDate + ",Type:" + obj.TypeID + ",ProductID:" + obj.ProductID + ",Count:" + str(obj.TargetCount) + ',Name:' + ProductSelect.CName)
+            #print(Temp_list)
+            data_list += [Temp_list]
+
+    #print(AllData_List)
+
+
+
+
+    if request.method == 'POST' and request.FILES['fileToUpload']:
+        uploaded_file = request.FILES['fileToUpload']
+        with open(filePath + uploaded_file.name, 'wb+') as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+
+    return render(request, "DataImport.html", {"UDTime": UDTime,
+                                               "data_list": data_list})
+
+
+
 def outputers(request):
     global globals_outType
-
-    tID = request.GET.get('type')  # "2ETC02"
-    if tID:
-        globals_outType = tID
-
 
     SysDatas = models.SystemSet.objects.filter(DataName='UpdateDateTime')
     for obj in SysDatas:
         UDTime = obj.StrData
 
+    tID = request.GET.get('type')  # "2ETC02"
+    if tID:
+        globals_outType = tID
+    else:
+        globals_outType = ""
+        return render(request, "outputers.html", {"UDTime": UDTime,
+                                                  "Type_list": GetTypesLists()})
+    print('Type:' + globals_outType)
 
-    if not globals_outType:
-            return render(request, "outputers.html", {"UDTime": UDTime,
-                                                      "Type_list": GetTypesLists()})
+    allTable = request.GET.get('allTable')
+    if allTable:
+        print('allTable:' + allTable)
+
+
+
 
     Header_list=['日期', '產品', '輸出', '庫存', '比率', '差異']
     date_list = []
-    data_list = []
+    Data_list = []
 
-    temp_list = models.Shiptable.objects.filter(TypeID=globals_outType)
-    for obj in temp_list:
+    temp_list1 = models.Shiptable.objects.filter(TypeID=globals_outType)
+    for obj1 in temp_list1:
         bFind=False
         for date in date_list:
-            if date == obj.ShipDate:
+            if date == obj1.ShipDate:
                 bFind=True
                 break
         if not bFind:
-            date_list += [obj.ShipDate]
+            date_list += [obj1.ShipDate]
     #print(date_list)
+    #time.sleep(1)
 
-
-    for obj in date_list:
+    for obj2 in date_list:
         my_list = []
-        temp_list = models.Shiptable.objects.filter(TypeID=globals_outType, ShipDate=obj)
-        index=1
-        for info in temp_list:
+        temp_list2 = models.Shiptable.objects.filter(TypeID=globals_outType, ShipDate=obj2)
+        index = 1
+        for info in temp_list2:
             info_list = [index]
-            info_list += [obj]
+            info_list += [obj2]
             info_list += [info.ProductID]
             info_list += [int(info.TargetCount)]
             info_list += [int(-1*info.WipCount)]
-            if info.TargetCount<=0:
+            if info.TargetCount <= 0:
                 info_list += [0]
             else:
                 info_list += [-100*info.WipCount/info.TargetCount]
@@ -129,23 +170,21 @@ def outputers(request):
                 info_list += [int(diff)]
             else:
                 info_list += [""]
-            index=index+1
+            index = index+1
             my_list += [info_list]
-        data_list += [my_list]
+        Data_list += [my_list]
 
-    #print(data_list)
+    #print(Data_list)
 
-    SysDatas = models.SystemSet.objects.filter(DataName='UpdateDateTime')
-    for obj in SysDatas:
-        UDTime = obj.StrData
-
-
+    if(len(Data_list) <= 0):
+        return render(request, "outputers.html", {"UDTime": UDTime,
+                                                  "Type_list": GetTypesLists()})
 
     return render(request, "outputers.html", {"UDTime": UDTime,
                                               "Type_list": GetTypesLists(),
                                               "Type_select": globals_outType,
                                               "Header_list": Header_list,
-                                              "data_list": data_list})
+                                              "data_list": Data_list})
 
 
 
@@ -216,6 +255,20 @@ def GetDataList(tID, wipID,bProduct,Product_list):
 
     return data_list
 
+def GetTargetHeaderList1(ProductID):
+    Header_list = []
+    data_first = models.runningtables.objects.filter(ProductID=ProductID).order_by('ProcessIndex')
+    #print(data_first)
+    for obj in data_first:
+        ProcessName = models.Process.objects.filter(ProcessID=obj.ProcessID)
+        for h in ProcessName:
+            Header_list += [h.CName]
+            break
+
+    Header_list += ["製程"]
+    Header_list.reverse()
+
+    return Header_list
 
 def GetTargetHeaderList(bProduct, Product_list):
     Header_list = []
@@ -234,6 +287,28 @@ def GetTargetHeaderList(bProduct, Product_list):
     Header_list.reverse()
 
     return Header_list
+
+def GetTargetDataList1(tID, ProductID):
+    temp_list = models.runningtables.objects.filter(TypeID=tID, ProductID=ProductID).order_by('ProcessIndex')
+
+    data_list = []
+    dataL1 = []
+    dataL2 = []
+    dataL3 = []
+    for index,obj in enumerate(reversed(temp_list)):
+        if index == 0:
+            dataL1 += ["庫存"]
+            dataL2 += ["目標"]
+            dataL3 += ["累計"]
+        dataL1 += [obj.TargetCount]
+        dataL2 += [obj.SumCount]
+        dataL3 += [obj.WipCount]
+
+    data_list += [dataL1]
+    data_list += [dataL2]
+    data_list += [dataL3]
+    return data_list
+
 def GetTargetDataList(tID, bProduct,Product_list):
     data_list = []
 
@@ -284,15 +359,6 @@ def TargetWip(request):
     global globals_wipType
     global globals_wipPart
 
-    if request.method == 'POST':
-        sumCountList = request.POST.getlist('sumcount', 'defaultData')
-        #print(f"You submitted the following items: {sumCountList}")
-        sumList = []
-        for fSum in sumCountList:
-            sumList.append(float(fSum))
-        print(sumList)
-
-
     tID = request.GET.get('type')  # "2ETC02"
     if tID:
         if (globals_wipType != tID):
@@ -312,6 +378,8 @@ def TargetWip(request):
                                                   "Type_list": GetTypesLists()})
     print("TypeID:" + globals_wipType)
 
+
+
     if not globals_wipPart:
         return render(request, "TargetWip.html", {"UDTime": UDTime,
                                                   "Type_list": GetTypesLists(),
@@ -325,7 +393,11 @@ def TargetWip(request):
     else:
         Product_list = LocalFunctions.GetPartList(globals_wipType, globals_wipPart)
     if Product_list.count() <= 0:
-        return HttpResponse("Product_list count=0")
+        #return HttpResponse("Product_list count=0")
+        return render(request, "TargetWip.html", {"UDTime": UDTime,
+                                                  "Type_list": GetTypesLists(),
+                                                  "Type_select": globals_wipType,
+                                                  "Product_list": GetSelectTypeLists(globals_wipType)})
 
     Header_list = GetTargetHeaderList(bProduct, Product_list)
     data_list = GetTargetDataList(globals_wipType, bProduct, Product_list)
@@ -372,15 +444,6 @@ def TargetWip1(request):
     global globals_wipType1
     global globals_wipPart1
 
-    if request.method == 'POST':
-        sumCountList = request.POST.getlist('sumcount', 'defaultData')
-        #print(f"You submitted the following items: {sumCountList}")
-        sumList = []
-        for fSum in sumCountList:
-            sumList.append(float(fSum))
-        print(sumList)
-
-
     tID = request.GET.get('type')  # "2ETC02"
     if tID:
         if (globals_wipType1 != tID):
@@ -391,6 +454,26 @@ def TargetWip1(request):
     if pID:
         globals_wipPart1 = pID
 
+    if request.method == 'POST':
+        sumCountList = request.POST.getlist('sumcount', 'defaultData')
+        SaveItems = models.runningtables.objects.filter(TypeID=globals_wipType1,
+                                                        ProductID=globals_wipPart1)
+        if(SaveItems.count()==len(sumCountList)):
+            pIndex=0
+            for fSum in reversed(sumCountList):
+                #print(str(pIndex) + ':' + fSum)
+                SaveItem = models.runningtables.objects.get(TypeID=globals_wipType1,
+                                                               ProductID=globals_wipPart1,
+                                                               ProcessIndex=pIndex)
+                if(SaveItem):
+                    SaveItem.SumCount = float(fSum)
+                    SaveItem.save()
+                    #print("Save" + str(pIndex))
+                pIndex=pIndex+1
+
+
+
+
     SysDatas = models.SystemSet.objects.filter(DataName='UpdateDateTime')
     for obj in SysDatas:
         UDTime = obj.StrData
@@ -400,32 +483,19 @@ def TargetWip1(request):
                                                   "Type_list": GetTypesLists()})
     print("TypeID:" + globals_wipType1)
 
-    if not globals_wipType1:
+    if not globals_wipPart1:
         return render(request, "TargetWip1.html", {"UDTime": UDTime,
                                                   "Type_list": GetTypesLists(),
                                                   "Type_select": globals_wipType1,
-                                                  "Product_list": GetSelectTypeLists(globals_wipType1)})
+                                                  "Product_list": GetSelectTypeListsAll(globals_wipType1)})
     print("ProductID:" + globals_wipPart1)
 
-    bProduct = (models.Product.objects.filter(ProductID=globals_wipPart1).count() > 0)
-    if(bProduct):
-        print("bProduct:True")
-    else:
-        print("bProduct:False")
-    if (bProduct):
-        Product_list = LocalFunctions.GetProductList(globals_wipType1)
-    else:
-        Product_list = LocalFunctions.GetPartList(globals_wipType1, globals_wipPart1)
-    if Product_list.count() <= 0:
-        #return HttpResponse("Product_list count=0")
-        return render(request, "TargetWip1.html", {"UDTime": UDTime,
-                                                  "Type_list": GetTypesLists(),
-                                                  "Type_select": globals_wipType1,
-                                                  "Product_list": GetSelectTypeLists(globals_wipType1)})
+    Header_list = GetTargetHeaderList1(globals_wipPart1)
+    #print(Header_list)
 
+    data_list = GetTargetDataList1(globals_wipType1, globals_wipPart1)
+    #print(data_list)
 
-    Header_list = GetTargetHeaderList(bProduct, Product_list)
-    data_list = GetTargetDataList(globals_wipType1, bProduct, Product_list)
     #print("Header_list:" + str(len(Header_list)) + ",data_list:" + str(len(data_list)))
 
     Label_list = []
@@ -454,7 +524,7 @@ def TargetWip1(request):
     return render(request, "TargetWip1.html", {"UDTime": UDTime,
                                               "Type_list": GetTypesLists(),
                                               "Type_select": globals_wipType1,
-                                              "Product_list": GetSelectTypeLists(globals_wipType1),
+                                              "Product_list": GetSelectTypeListsAll(globals_wipType1),
                                               "Product_select": globals_wipPart1,
                                               "Header_list": Header_list,
                                               "data_list": data_list,
@@ -512,7 +582,7 @@ def runningtables(request):
     print ("Type_select2:" + globals_Type2)
 
     ProductList2=GetSelectTypeLists(globals_Type2)
-    print("Product_list2:" + " ".join(ProductList2))
+    #print("Product_list2:" + " ".join(ProductList2))
 
 
     if not globals_Part:
@@ -542,11 +612,17 @@ def runningtables(request):
         Product_list = LocalFunctions.GetPartList(globals_Type, globals_Part)
 
     if Product_list.count() <= 0:
-        return HttpResponse("Product_list count=0")
+        #return HttpResponse("Product_list count=0")
+        return render(request, "runningtables.html", {"UDTime": UDTime,
+                                                      "Type_list": GetTypesLists(),
+                                                      "Type_select": globals_Type,
+                                                      "Product_list": GetSelectTypeLists(globals_Type),
+                                                      "Type_select2": globals_Type2,
+                                                      "Product_list2": ProductList2})
 
     Header_list = GetHeaderList(bProduct, Product_list)
     data_list = GetDataList(globals_Type, globals_Wip, bProduct, Product_list)
-    print("Header_list:" + str(len(Header_list)) + ",data_list:" + str(len(data_list)))
+    #print("Header_list:" + str(len(Header_list)) + ",data_list:" + str(len(data_list)))
 
     if(len(ProductList2) >0):
         bProduct2 = (models.Product.objects.filter(ProductID=globals_Part2).count() > 0)
@@ -557,7 +633,7 @@ def runningtables(request):
         if(len(Product_list2)>0):
             Header_list2 = GetHeaderList(bProduct2, Product_list2)
             data_list2 = GetDataList(globals_Type2, globals_Wip2, bProduct2, Product_list2)
-            print("Header_list2:" + str(len(Header_list2)) + ",data_list2:" + str(len(data_list2)))
+            #print("Header_list2:" + str(len(Header_list2)) + ",data_list2:" + str(len(data_list2)))
 
             return render(request, "runningtables.html", {"UDTime": UDTime,
                                                           "Type_list": GetTypesLists(),
@@ -577,6 +653,8 @@ def runningtables(request):
                                                           "data_list2": data_list2})
 
 
+
+    #print(data_list)
     return render(request, "runningtables.html", {"UDTime": UDTime,
                                                   "Type_list": GetTypesLists(),
                                                   "Type_select": globals_Type,
@@ -609,6 +687,14 @@ def GetSelectTypeLists(type):
             for p in lstTemp2:
                 lstTemp3 += [p["ProductID"]]
             Product_list+=lstTemp3
+    return Product_list
+
+def GetSelectTypeListsAll(type):
+    Product_list = []
+    lstTemp = models.Titles.objects.filter(TypeID=type).values('Members')
+    for t in lstTemp:
+        strTemp = t["Members"]
+        Product_list += [strTemp]
     return Product_list
 
 def GetSelectLists(id,lstTypes,lstProducts):

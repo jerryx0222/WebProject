@@ -1,27 +1,53 @@
 <!-- menuOutput.html -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.10/xlsx.full.min.js"></script>
+<form>
+    <a>類別:
+        <select id="out-type-list" onchange="changeOutType(this.value)">
+            <option>請選擇類別</option>
+            {% for item in Type_list %}
+                {% if Type_select == item  %}
+                    <option value='{{ item }}' selected> {{ item }} </option>
+                {% else %}
+                    <option value='{{ item }}'> {{ item }} </option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </a>
 
-<a>類別:
-    <select id="type-list" onchange="changeType(this.value)">
-        <option>請選擇類別</option>
-        {% for item in Type_list %}
-            {% if Type_select == item  %}
-                <option value='{{ item }}' selected> {{ item }} </option>
-            {% else %}
-                <option value='{{ item }}'> {{ item }} </option>
-            {% endif %}
-        {% endfor %}
-    </select>
-</a>
-&nbsp;
+</form>
+
 
 
 <script>
 
-function changeType(type)
+function changeOutType(type)
 {
     var newUrl = window.location.href.split('?')[0] + '?type=' + type;
     window.location.href = newUrl;
 }
+
+// 使用 JavaScript 重新載入頁面並保留原 GET 參數
+function reloadPageWithParams()
+{
+    const currentURL = window.location.href; // 取得目前的網址
+    const params = window.location.search; // 取得目前的 GET 參數
+
+    // 儲存原本的 GET 參數
+    sessionStorage.setItem('originalParams', params);
+
+    // 重新載入頁面
+    location.reload();
+}
+
+// 在頁面載入完成後檢查是否有原始的 GET 參數，並加回去
+window.addEventListener('load', function() {
+    const originalParams = sessionStorage.getItem('originalParams');
+    if (originalParams) {
+        const currentURL = window.location.href;
+        const updatedURL = currentURL.split('?')[0] + originalParams; // 移除原本的 GET 參數再加回去
+        history.replaceState(null, null, updatedURL);
+        sessionStorage.removeItem('originalParams');
+    }
+});
 
 </script>

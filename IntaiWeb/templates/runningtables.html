@@ -45,9 +45,17 @@
         </tr>
       </tbody>
     </table>
+  {% for obj_list in data_list %}
+    {% if forloop.counter == 1 %}
+      <br>
+      <button onclick="convertTableToXLSX('tb1', 'table1')">導出XLSX檔</button>
+      <br>
+    {% endif %}
+  {% endfor %}
 {% endblock %}
 
 {% block content2 %}
+    <hr>
     <table id="tb2" border="3">
       <thred>
           {% for obj_list in Header_list2 %}
@@ -77,4 +85,11 @@
         </tr>
       </tbody>
     </table>
+    {% for obj_list in data_list2 %}
+    {% if forloop.counter == 1 %}
+      <br>
+      <button onclick="convertTableToXLSX('tb2', 'table2')">導出XLSX檔</button>
+      <br>
+    {% endif %}
+  {% endfor %}
 {% endblock %}

@@ -70,11 +70,15 @@
                 {% endif %}
                 </tr>
               {% endfor %}
+            </tr>
           </tbody>
         </table>
-        &nbsp;
-        <button type="submit" onclick="saveData()">儲存</button>
-        &nbsp;
+        {% for obj_list in data_list %}
+            {% if forloop.counter == 1 %}
+            <br>
+            <button type="submit" onclick="saveData()">儲存</button>
+            {% endif %}
+        {% endfor %}
     </form>
 
     <!--

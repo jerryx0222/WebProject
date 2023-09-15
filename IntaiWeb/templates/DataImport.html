@@ -1,0 +1,33 @@
+<!-- DataImport.html -->
+{% extends 'base.html' %}
+{% block title %} DataImport {% endblock %}
+{% block headmessage %}
+    <title>資料上傳下載</title>
+{% endblock %}
+
+{% block content %}
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        選擇檔案: <input type="file" name="fileToUpload" id="fileToUpload"><br><br>
+        <input type="submit" value="上傳出貨日期檔" name="submit">
+        <button id="btnDwn" onclick="convertTableToXLSX('tbDownload', 'table3')">下載出貨日期檔</button>
+    </form>
+    <BR>
+    <hr>
+
+    <table id="tbDownload" border="3">
+      <tbody>
+        <tr>
+          {% for obj_list in data_list %}
+            <tr>
+            {% for item in obj_list %}
+                <td>{{item}}</td>
+            {% endfor %}
+            </tr>
+          {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+
+{% endblock %}
+

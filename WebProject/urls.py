@@ -23,9 +23,10 @@ urlpatterns = [
     path('TargetWip/', views.TargetWip, name='TargetWip'),
     path('TargetWip1/', views.TargetWip1, name='TargetWip1'),
     path('outputers/', views.outputers),
+    path('DataImport/', views.DataImport),
 
 
-    path('', views.homepage),
+    path('', views.runningtables),
     path('admin/', admin.site.urls),
 
 ]
