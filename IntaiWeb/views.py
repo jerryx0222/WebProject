@@ -68,6 +68,9 @@ def DataImport(request):
     SysDatas = models.SystemSet.objects.get(DataName='UpdateFilePath')
     if (SysDatas):
         filePath = SysDatas.StrData
+        print("filePath:" + filePath)
+    else:
+        print("Read Systemset Error!")
 
     today_date = datetime.today()
     today_date_str = today_date.strftime("%Y/%m/%d")
@@ -101,11 +104,12 @@ def DataImport(request):
 
 
 
-    if request.method == 'POST' and request.FILES['fileToUpload']:
-        uploaded_file = request.FILES['fileToUpload']
-        with open(filePath + uploaded_file.name, 'wb+') as destination:
-            for chunk in uploaded_file.chunks():
-                destination.write(chunk)
+    if request.method == 'POST':
+        uploaded_file = request.FILES.get('fileToUpload')
+        if uploaded_file:
+            with open(filePath + uploaded_file.name, 'wb+') as destination:
+                for chunk in uploaded_file.chunks():
+                    destination.write(chunk)
 
     return render(request, "DataImport.html", {"UDTime": UDTime,
                                                "data_list": data_list})
