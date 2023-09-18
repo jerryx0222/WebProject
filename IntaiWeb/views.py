@@ -4,7 +4,7 @@ from IntaiWeb import LocalFunctions
 from .forms import MyModelForm
 from .globals import globals_Part, globals_Wip, globals_Type, globals_Part2, globals_Type2, globals_Wip2
 from .globals import globals_wipType, globals_wipPart, globals_wipType1, globals_wipPart1
-from .globals import globals_outType, globals_outFlag
+from .globals import globals_outType, globals_outFlag, globals_loginuser
 from django import forms
 from datetime import datetime
 import random
@@ -60,9 +60,17 @@ def login(request):
             return render(request, "login.html", {"error_msg": "login failed"})
 
 def DataImport(request):
+    global globals_loginuser
+
     SysDatas = models.SystemSet.objects.get(DataName='UpdateDateTime')
     if(SysDatas):
         UDTime = SysDatas.StrData
+
+    if request.method == 'POST':
+        globals_loginuser = ""
+        if(request.POST.get('password')=="1234"):
+            globals_loginuser="OK"
+        #print("password:" + password)
 
     filePath = "C:/Users/MyUser/Downloads/"
     SysDatas = models.SystemSet.objects.get(DataName='UpdateFilePath')
@@ -112,7 +120,8 @@ def DataImport(request):
                     destination.write(chunk)
 
     return render(request, "DataImport.html", {"UDTime": UDTime,
-                                               "data_list": data_list})
+                                               "data_list": data_list,
+                                               "globals_loginuser": globals_loginuser})
 
 
 
@@ -447,6 +456,7 @@ def TargetWip(request):
 def TargetWip1(request):
     global globals_wipType1
     global globals_wipPart1
+    global globals_loginuser
 
     tID = request.GET.get('type')  # "2ETC02"
     if tID:
@@ -491,7 +501,8 @@ def TargetWip1(request):
         return render(request, "TargetWip1.html", {"UDTime": UDTime,
                                                   "Type_list": GetTypesLists(),
                                                   "Type_select": globals_wipType1,
-                                                  "Product_list": GetSelectTypeListsAll(globals_wipType1)})
+                                                  "Product_list": GetSelectTypeListsAll(globals_wipType1),
+                                                   "globals_loginuser": globals_loginuser})
     print("ProductID:" + globals_wipPart1)
 
     Header_list = GetTargetHeaderList1(globals_wipPart1)
@@ -535,7 +546,8 @@ def TargetWip1(request):
                                               "Label_list": Label_list,
                                               "DatasPlot1": DatasPlot1,
                                               "DatasPlot2": DatasPlot2,
-                                              "DatasPlot3": DatasPlot3})
+                                              "DatasPlot3": DatasPlot3,
+                                               "globals_loginuser": globals_loginuser})
 
 
 def runningtables(request):

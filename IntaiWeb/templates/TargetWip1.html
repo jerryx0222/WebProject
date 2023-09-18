@@ -76,7 +76,11 @@
         {% for obj_list in data_list %}
             {% if forloop.counter == 1 %}
             <br>
-            <button type="submit" onclick="saveData()">儲存</button>
+                {% if globals_loginuser == "OK" %}
+                    <button type="submit" onclick="saveData()">儲存</button>
+                {% else %}
+                    <button type="submit" onclick="saveData()" disabled>儲存</button>
+                {% endif %}
             {% endif %}
         {% endfor %}
     </form>

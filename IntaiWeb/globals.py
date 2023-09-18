@@ -16,3 +16,5 @@ globals_wipPart1 = ""
 
 globals_outType = ""
 globals_outFlag = ""
+
+globals_loginuser = ""

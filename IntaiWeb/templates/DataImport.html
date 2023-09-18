@@ -8,9 +8,20 @@
 {% block content %}
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        選擇檔案: <input type="file" name="fileToUpload" id="fileToUpload"><br><br>
-        <input type="submit" value="上傳出貨日期檔" name="submit">
+        選擇檔案: <input type="file" name="fileToUpload" id="fileToUpload">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <label for="password">密碼:</label>&nbsp;<input type="password" id="password" name="password">&nbsp;
+        <input type="submit" value="登入">
+        <br><br>
+        {% if globals_loginuser == "OK" %}
+            <input type="submit" value="上傳出貨日期檔" name="submit"><br><br>
+        {% else %}
+            <input type="submit" value="上傳出貨日期檔" name="submit" disabled><br><br>
+        {% endif %}
         <button id="btnDwn" onclick="convertTableToXLSX('tbDownload', 'table3')">下載出貨日期檔</button>
+        <br><br>
+        <hr>
+
+        <hr>
     </form>
     <BR>
     <hr>
@@ -28,6 +39,8 @@
         </tr>
       </tbody>
     </table>
+
+
 
 {% endblock %}
 
