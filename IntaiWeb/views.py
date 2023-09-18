@@ -10,6 +10,7 @@ from datetime import datetime
 import random
 import cgi
 import time
+import os
 
 # Create your views here.
 
@@ -115,9 +116,12 @@ def DataImport(request):
     if request.method == 'POST':
         uploaded_file = request.FILES.get('fileToUpload')
         if uploaded_file:
-            with open(filePath + uploaded_file.name, 'wb+') as destination:
+            strFileSave=filePath + uploaded_file.name
+            print("strFileSave:" + strFileSave)
+            with open(strFileSave, 'wb+') as destination:
                 for chunk in uploaded_file.chunks():
                     destination.write(chunk)
+            os.chmod(strFileSave, 0o777)
 
     return render(request, "DataImport.html", {"UDTime": UDTime,
                                                "data_list": data_list,
