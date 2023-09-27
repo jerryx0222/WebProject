@@ -102,7 +102,7 @@ def DataImport(request):
             Temp_list += [obj.ShipDate]
             Temp_list += [obj.TypeID]
             Temp_list += [obj.ProductID]
-            Temp_list += [str(obj.TargetCount)]
+            Temp_list += [int(obj.TargetCount)]
             Temp_list += [ProductSelect.CName]
             #print("Date:" + obj.ShipDate + ",Type:" + obj.TypeID + ",ProductID:" + obj.ProductID + ",Count:" + str(obj.TargetCount) + ',Name:' + ProductSelect.CName)
             #print(Temp_list)
@@ -263,9 +263,9 @@ def GetDataList(tID, wipID,bProduct,Product_list):
 
         for v in reversed(temp_list):
             if (wipID != "1"):
-                hlist += [v.WipCount]
+                hlist += [int(v.WipCount)]
             else:
-                hlist += [v.TargetCount]
+                hlist += [int(v.TargetCount)]
 
 
         data_list += [hlist]
@@ -317,9 +317,9 @@ def GetTargetDataList1(tID, ProductID):
             dataL1 += ["庫存"]
             dataL2 += ["目標"]
             dataL3 += ["累計"]
-        dataL1 += [obj.TargetCount]
-        dataL2 += [obj.SumCount]
-        dataL3 += [obj.WipCount]
+        dataL1 += [int(obj.TargetCount)]
+        dataL2 += [int(obj.SumCount)]
+        dataL3 += [int(obj.WipCount)]
 
     data_list += [dataL1]
     data_list += [dataL2]
@@ -340,31 +340,31 @@ def GetTargetDataList(tID, bProduct,Product_list):
             hlist = []
             hlist += ["庫存"]
             for v in reversed(temp_list):
-                hlist += [v.TargetCount]
+                hlist += [int(v.TargetCount)]
             data_list += [hlist]
         else:
             for index2, v in enumerate(reversed(temp_list)):
-                data_list[0][index2+1] += v.TargetCount
+                data_list[0][index2+1] += int(v.TargetCount)
 
         if index == 0:
             hlist = []
             hlist += ["目標"]
             for v in reversed(temp_list):
-                hlist += [v.SumCount]
+                hlist += [int(v.SumCount)]
             data_list += [hlist]
         else:
             for index2, v in enumerate(reversed(temp_list)):
-                data_list[1][index2+1] += v.SumCount
+                data_list[1][index2+1] += int(v.SumCount)
 
         if index == 0:
             hlist = []
             hlist += ["累計"]
             for v in reversed(temp_list):
-                hlist += [v.WipCount]
+                hlist += [int(v.WipCount)]
             data_list += [hlist]
         else:
             for index2, v in enumerate(reversed(temp_list)):
-                data_list[2][index2+1] += v.WipCount
+                data_list[2][index2+1] += int(v.WipCount)
 
     #print(data_list)
 
