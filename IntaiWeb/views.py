@@ -152,7 +152,7 @@ def outputers(request):
 
 
 
-    Header_list=['日期', '產品', '輸出', '庫存', '比率', '差異']
+    Header_list=['日期', '產品', '出貨數量', '成倉庫存', '達成率', '尚缺數量']
     date_list = []
     Data_list = []
 
