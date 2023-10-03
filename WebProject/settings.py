@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent / 'IntaiWeb'
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-jhwcd+%ppfr%k3g3c1a243r4nu=d_v+shqkn@(u*7dhmj)a-vt
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.18.51','127.0.0.1','192.168.182.129']
+ALLOWED_HOSTS = ['192.168.18.51', '127.0.0.1', '192.168.182.129']
 
 
 # Application definition
@@ -79,8 +80,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mydata',
         'USER': 'root',
-        'PASSWORD': 'password',
-        #'PASSWORD': 'hcs09871234',
+        #'PASSWORD': 'password',
+        'PASSWORD': 'hcs09871234',
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
@@ -127,6 +128,8 @@ USE_TZ = True
 
 #'IntaiWeb/static/'
 #STATIC_ROOT = '/home/intai/myWeb/WebProject/IntaiWeb/static'
+
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 STATIC_URL = 'static/'
 

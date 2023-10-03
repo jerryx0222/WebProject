@@ -562,6 +562,8 @@ def runningtables(request):
     global globals_Part2
     global globals_Wip2
 
+
+
     tID = request.GET.get('type')   #"2ETC02"
     if tID:
         if(globals_Type != tID):
