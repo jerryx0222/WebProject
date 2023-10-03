@@ -312,14 +312,17 @@ def GetTargetDataList1(tID, ProductID):
     dataL1 = []
     dataL2 = []
     dataL3 = []
-    for index,obj in enumerate(reversed(temp_list)):
+    for index, obj in enumerate(reversed(temp_list)):
         if index == 0:
             dataL1 += ["庫存"]
             dataL2 += ["目標"]
             dataL3 += ["累計"]
         dataL1 += [int(obj.TargetCount)]
         dataL2 += [int(obj.SumCount)]
-        dataL3 += [int(obj.WipCount)]
+        if obj.WipCount < 0:
+            dataL3 += [0]
+        else:
+            dataL3 += [int(obj.WipCount)]
 
     data_list += [dataL1]
     data_list += [dataL2]
@@ -360,11 +363,17 @@ def GetTargetDataList(tID, bProduct,Product_list):
             hlist = []
             hlist += ["累計"]
             for v in reversed(temp_list):
-                hlist += [int(v.WipCount)]
+                if v.WipCount < 0:
+                    hlist += [0]
+                else:
+                    hlist += [int(v.WipCount)]
             data_list += [hlist]
         else:
             for index2, v in enumerate(reversed(temp_list)):
-                data_list[2][index2+1] += int(v.WipCount)
+                if v.WipCount < 0:
+                    data_list[2][index2+1] += 0
+                else:
+                    data_list[2][index2+1] += int(v.WipCount)
 
     #print(data_list)
 
