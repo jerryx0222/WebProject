@@ -247,14 +247,18 @@ def GetDataList(tID, wipID,bProduct,Product_list):
         if (bProduct):
             hlist += [obj.ProductID]
             temp_list = models.Product.objects.filter(ProductID=obj.ProductID)
+            for name in temp_list:
+                hlist += [name.CName]
+                break
         else:
             hlist += [obj.Members]
             temp_list = models.Part.objects.filter(PartID=obj.Members)
+            for name in temp_list:
+                hlist += [name.CName + name.Specification]
+                break
         #print(temp_list)
 
-        for name in temp_list:
-            hlist += [name.CName]
-            break
+
 
         if (bProduct):
             temp_list = models.runningtables.objects.filter(TypeID=tID, ProductID=obj.ProductID)
