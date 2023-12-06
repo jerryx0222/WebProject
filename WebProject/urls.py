@@ -25,6 +25,7 @@ urlpatterns = [
     path('outputers/', views.outputers),
     path('DataImport/', views.DataImport),
 
+    path('download/', views.download_file, name='download_file'),
 
     path('', views.runningtables),
     path('admin/', admin.site.urls),

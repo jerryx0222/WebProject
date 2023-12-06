@@ -768,3 +768,15 @@ def TypeSelect(request, gId):
     form = TypeModeForm()
     return render(request, "TypeSelect.html", {"form": form})
 """
+
+
+def download_file(request):
+    file_path = '/home/intai/download.dat'
+    #file_path = 'C:\_ShareDatas\download.dat'
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as file:
+            response = HttpResponse(file.read(), content_type='application/octet-stream')
+            response['Content-Disposition'] = 'attachment; filename=download.dat'
+            return response
+    else:
+        return HttpResponse('File not found.', status=404)
