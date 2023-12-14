@@ -2,6 +2,10 @@ from IntaiWeb import models
 from django.db.models import Count
 
 def GetProductList(tID):
+    index_of_open_parenthesis = tID.find('(')
+    if index_of_open_parenthesis != -1:
+        tID = tID[:index_of_open_parenthesis]
+
     temp_list = models.Shiptable.objects.filter(TypeID=tID)
     productIDs = []
     for obj in temp_list:
@@ -10,6 +14,10 @@ def GetProductList(tID):
     return models.Product.objects.filter(TypeID=tID, ProductID__in=productIDs)
 
 def GetPartList(tID, pID):
+    index_of_open_parenthesis = tID.find('(')
+    if index_of_open_parenthesis != -1:
+        tID = tID[:index_of_open_parenthesis]
+
     part_list = models.Titles.objects.filter(TypeID=tID, ProductID=pID)
     if part_list.count() > 0:
         return part_list

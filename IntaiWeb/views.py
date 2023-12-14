@@ -142,21 +142,24 @@ def outputers(request):
     else:
         globals_outType = ""
         return render(request, "outputers.html", {"UDTime": UDTime,
-                                                  "Type_list": GetTypesLists()})
+                                                  "Type_list": GetTypeNamesLists()})
     print('Type:' + globals_outType)
 
     allTable = request.GET.get('allTable')
     if allTable:
         print('allTable:' + allTable)
 
-
+    runType = globals_outType
+    index_of_open_parenthesis = runType.find('(')
+    if index_of_open_parenthesis != -1:
+        runType = runType[:index_of_open_parenthesis]
 
 
     Header_list=['日期', '產品', '計劃出貨', '成倉庫存', '達成率', '尚缺數量']
     date_list = []
     Data_list = []
 
-    temp_list1 = models.Shiptable.objects.filter(TypeID=globals_outType)
+    temp_list1 = models.Shiptable.objects.filter(TypeID=runType)
     for obj1 in temp_list1:
         bFind=False
         for date in date_list:
@@ -170,7 +173,7 @@ def outputers(request):
 
     for obj2 in date_list:
         my_list = []
-        temp_list2 = models.Shiptable.objects.filter(TypeID=globals_outType, ShipDate=obj2)
+        temp_list2 = models.Shiptable.objects.filter(TypeID=runType, ShipDate=obj2)
         index = 1
         for info in temp_list2:
             info_list = [index]
@@ -195,10 +198,10 @@ def outputers(request):
 
     if(len(Data_list) <= 0):
         return render(request, "outputers.html", {"UDTime": UDTime,
-                                                  "Type_list": GetTypesLists()})
+                                                  "Type_list": GetTypeNamesLists()})
 
     return render(request, "outputers.html", {"UDTime": UDTime,
-                                              "Type_list": GetTypesLists(),
+                                              "Type_list": GetTypeNamesLists(),
                                               "Type_select": globals_outType,
                                               "Header_list": Header_list,
                                               "data_list": Data_list})
@@ -240,6 +243,10 @@ def GetHeaderList(bProduct, Product_list):
     return Header_list
 
 def GetDataList(tID, wipID,bProduct,Product_list):
+    index_of_open_parenthesis = tID.find('(')
+    if index_of_open_parenthesis != -1:
+        tID = tID[:index_of_open_parenthesis]
+
     data_list = []
 
     for obj in Product_list:
@@ -310,23 +317,31 @@ def GetTargetHeaderList(bProduct, Product_list):
     return Header_list
 
 def GetTargetDataList1(tID, ProductID):
+    index_of_open_parenthesis = tID.find('(')
+    if index_of_open_parenthesis != -1:
+        tID = tID[:index_of_open_parenthesis]
+
     temp_list = models.runningtables.objects.filter(TypeID=tID, ProductID=ProductID).order_by('ProcessIndex')
 
     data_list = []
     dataL1 = []
     dataL2 = []
     dataL3 = []
+
     for index, obj in enumerate(reversed(temp_list)):
         if index == 0:
-            dataL1 += ["庫存"]
-            dataL2 += ["目標"]
-            dataL3 += ["累計"]
-        dataL1 += [int(obj.TargetCount)]
+            dataL1 += ["當日目標"]
+            dataL2 += ["當日累計"]
+            dataL3 += ["達成率(%)"]
         dataL2 += [int(obj.SumCount)]
-        if obj.WipCount < 0:
-            dataL3 += [0]
+
+        if(obj.WipCount<0):
+            dataL1 += [int(-1 * obj.WipCount)]
+            dataL3 += [int(-100 * obj.SumCount / obj.WipCount)]
         else:
-            dataL3 += [int(obj.WipCount)]
+            dataL1 += [0]
+            dataL3 += [0]
+
 
     data_list += [dataL1]
     data_list += [dataL2]
@@ -334,9 +349,14 @@ def GetTargetDataList1(tID, ProductID):
     return data_list
 
 def GetTargetDataList(tID, bProduct,Product_list):
-    data_list = []
+    index_of_open_parenthesis = tID.find('(')
+    if index_of_open_parenthesis != -1:
+        tID = tID[:index_of_open_parenthesis]
 
-    for index,obj in enumerate(Product_list):
+    data_list = []
+    alpha = 0
+    beta = 0
+    for index, obj in enumerate(Product_list):
 
         if (bProduct):
             temp_list = models.runningtables.objects.filter(TypeID=tID, ProductID=obj.ProductID)
@@ -345,41 +365,49 @@ def GetTargetDataList(tID, bProduct,Product_list):
 
         if index == 0:
             hlist = []
-            hlist += ["庫存"]
+            hlist += ["當日目標"]
             for v in reversed(temp_list):
-                hlist += [int(v.TargetCount)]
+                if v.WipCount<0:
+                    hlist += [int(-1*v.WipCount)]
+                else:
+                    hlist += [0]
             data_list += [hlist]
-        else:
-            for index2, v in enumerate(reversed(temp_list)):
-                data_list[0][index2+1] += int(v.TargetCount)
+        #else:
+        #    for index2, v in enumerate(reversed(temp_list)):
+        #        if v.WipCount < 0:
+        #            data_list[0][index2+1] += int(-1*v.WipCount)
+
 
         if index == 0:
             hlist = []
-            hlist += ["目標"]
+            hlist += ["當日累計"]
             for v in reversed(temp_list):
                 hlist += [int(v.SumCount)]
             data_list += [hlist]
-        else:
-            for index2, v in enumerate(reversed(temp_list)):
-                data_list[1][index2+1] += int(v.SumCount)
+        #else:
+        #    for index2, v in enumerate(reversed(temp_list)):
+        #        data_list[1][index2+1] += int(v.SumCount)
 
         if index == 0:
             hlist = []
-            hlist += ["累計"]
-            for v in reversed(temp_list):
-                if v.WipCount < 0:
-                    hlist += [0]
-                else:
-                    hlist += [int(v.WipCount)]
-            data_list += [hlist]
-        else:
+            hlist += ["達成率(%)"]
             for index2, v in enumerate(reversed(temp_list)):
-                if v.WipCount < 0:
-                    data_list[2][index2+1] += 0
+                if data_list[0][index2+1] > 0:
+                    hlist += [int(data_list[1][index2+1] * 100 / data_list[0][index2+1])]
                 else:
-                    data_list[2][index2+1] += int(v.WipCount)
+                    hlist += [0]
+            data_list += [hlist]
+        #else:
+        #    for index2, v in enumerate(reversed(temp_list)):
+        #        if v.WipCount < 0:
+        #            data_list[2][index2 + 1] += 1
 
-    #print(data_list)
+
+
+
+
+
+        #print(data_list)
 
     return data_list
 
@@ -405,14 +433,14 @@ def TargetWip(request):
 
     if not globals_wipType:
         return render(request, "TargetWip.html", {"UDTime": UDTime,
-                                                  "Type_list": GetTypesLists()})
+                                                  "Type_list": GetTypeNamesLists()})
     print("TypeID:" + globals_wipType)
 
 
 
     if not globals_wipPart:
         return render(request, "TargetWip.html", {"UDTime": UDTime,
-                                                  "Type_list": GetTypesLists(),
+                                                  "Type_list": GetTypeNamesLists(),
                                                   "Type_select": globals_wipType,
                                                   "Product_list": GetSelectTypeLists(globals_wipType)})
     print("ProductID:" + globals_wipPart)
@@ -425,7 +453,7 @@ def TargetWip(request):
     if Product_list.count() <= 0:
         #return HttpResponse("Product_list count=0")
         return render(request, "TargetWip.html", {"UDTime": UDTime,
-                                                  "Type_list": GetTypesLists(),
+                                                  "Type_list": GetTypeNamesLists(),
                                                   "Type_select": globals_wipType,
                                                   "Product_list": GetSelectTypeLists(globals_wipType)})
 
@@ -457,7 +485,7 @@ def TargetWip(request):
 
 
     return render(request, "TargetWip.html", {"UDTime": UDTime,
-                                              "Type_list": GetTypesLists(),
+                                              "Type_list": GetTypeNamesLists(),
                                               "Type_select": globals_wipType,
                                               "Product_list": GetSelectTypeLists(globals_wipType),
                                               "Product_select": globals_wipPart,
@@ -511,12 +539,12 @@ def TargetWip1(request):
 
     if not globals_wipType1:
         return render(request, "TargetWip1.html", {"UDTime": UDTime,
-                                                  "Type_list": GetTypesLists()})
+                                                  "Type_list": GetTypeNamesLists()})
     print("TypeID:" + globals_wipType1)
 
     if not globals_wipPart1:
         return render(request, "TargetWip1.html", {"UDTime": UDTime,
-                                                  "Type_list": GetTypesLists(),
+                                                  "Type_list": GetTypeNamesLists(),
                                                   "Type_select": globals_wipType1,
                                                   "Product_list": GetSelectTypeListsAll(globals_wipType1),
                                                    "globals_loginuser": globals_loginuser})
@@ -554,7 +582,7 @@ def TargetWip1(request):
 
 
     return render(request, "TargetWip1.html", {"UDTime": UDTime,
-                                              "Type_list": GetTypesLists(),
+                                              "Type_list": GetTypeNamesLists(),
                                               "Type_select": globals_wipType1,
                                               "Product_list": GetSelectTypeListsAll(globals_wipType1),
                                               "Product_select": globals_wipPart1,
@@ -574,8 +602,6 @@ def runningtables(request):
     global globals_Type2
     global globals_Part2
     global globals_Wip2
-
-
 
     tID = request.GET.get('type')   #"2ETC02"
     if tID:
@@ -610,19 +636,22 @@ def runningtables(request):
     #if globals_Type:
     #    return render(request, "runningtables.html", {"UDTime": UDTime,
     #                                                      "Type_list": GetTypesLists()})
-    print("TypeID:" + globals_Type)
+    print("globals_Type:" + globals_Type)
 
     if not globals_Type2:
-        globals_Type2=""
-    print ("Type_select2:" + globals_Type2)
+        globals_Type2 = ""
+    print("globals_Type2:" + globals_Type2)
 
     ProductList2=GetSelectTypeLists(globals_Type2)
     #print("Product_list2:" + " ".join(ProductList2))
 
+    #print("*** Start ***")
+    #print(GetTypeNamesLists())
+    #print("*** End ***")
 
     if not globals_Part:
         return render(request, "runningtables.html", {"UDTime": UDTime,
-                                                      "Type_list": GetTypesLists(),
+                                                      "Type_list": GetTypeNamesLists(),
                                                       "Type_select": globals_Type,
                                                       "Product_list": GetSelectTypeLists(globals_Type),
                                                       "Type_select2": globals_Type2,
@@ -649,7 +678,7 @@ def runningtables(request):
     if Product_list.count() <= 0:
         #return HttpResponse("Product_list count=0")
         return render(request, "runningtables.html", {"UDTime": UDTime,
-                                                      "Type_list": GetTypesLists(),
+                                                      "Type_list": GetTypeNamesLists(),
                                                       "Type_select": globals_Type,
                                                       "Product_list": GetSelectTypeLists(globals_Type),
                                                       "Type_select2": globals_Type2,
@@ -671,7 +700,7 @@ def runningtables(request):
             #print("Header_list2:" + str(len(Header_list2)) + ",data_list2:" + str(len(data_list2)))
 
             return render(request, "runningtables.html", {"UDTime": UDTime,
-                                                          "Type_list": GetTypesLists(),
+                                                          "Type_list": GetTypeNamesLists(),
 
                                                           "Type_select": globals_Type,
                                                           "Product_list": GetSelectTypeLists(globals_Type),
@@ -691,7 +720,7 @@ def runningtables(request):
 
     #print(data_list)
     return render(request, "runningtables.html", {"UDTime": UDTime,
-                                                  "Type_list": GetTypesLists(),
+                                                  "Type_list": GetTypeNamesLists(),
                                                   "Type_select": globals_Type,
                                                   "Product_list": GetSelectTypeLists(globals_Type),
                                                   "Product_select": globals_Part,
@@ -711,7 +740,23 @@ def GetTypesLists():
         lstTypes += [strTemp]
     return lstTypes
 
+def GetTypeNamesLists():
+    lstNames = []
+    lstTemp = models.Titles.objects.values('TypeID').order_by('TypeID').distinct()
+    for t in lstTemp:
+        strTemp = t["TypeID"]
+        lstTemp2 = models.Types.objects.filter(TypeID=strTemp).values('TypeName')
+        for k in lstTemp2:
+            lstNames += [strTemp + "(" + k["TypeName"] + ")"]
+            break
+    return lstNames
+
 def GetSelectTypeLists(type):
+    index_of_open_parenthesis = type.find('(')
+    if index_of_open_parenthesis != -1:
+        type = type[:index_of_open_parenthesis]
+
+
     Product_list = []
     lstTemp = models.Titles.objects.values('TypeID').order_by('TypeID').distinct()
     for t in lstTemp:
@@ -725,6 +770,10 @@ def GetSelectTypeLists(type):
     return Product_list
 
 def GetSelectTypeListsAll(type):
+    index_of_open_parenthesis = type.find('(')
+    if index_of_open_parenthesis != -1:
+        type = type[:index_of_open_parenthesis]
+
     Product_list = []
     lstTemp = models.Titles.objects.filter(TypeID=type).values('Members')
     for t in lstTemp:

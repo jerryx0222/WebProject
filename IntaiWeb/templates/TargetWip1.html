@@ -49,6 +49,7 @@
                                 {{item}}
                             </td>
                         {% else %}
+                            <!--
                             <td class="editable">
                                 <input type="text"
                                        style="width: 100px; text-align: center;"
@@ -56,6 +57,10 @@
                                        name="sumcount"
                                        onkeydown="keepValue(event)"
                                        value="{{item}}" />
+                            </td>
+                            -->
+                            <td>
+                                {{item}}
                             </td>
                         {% endif %}
                     {% endfor %}
@@ -103,21 +108,21 @@
                 labels: {{ Label_list|safe }},
                 datasets: [
                      {
-                        label: '庫存',
+                        label: '當日目標',
                         data: {{ DatasPlot1|safe }},
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 1,
                     },
                     {
-                        label: '目標',
+                        label: '當日累計',
                         data: {{ DatasPlot2|safe }},
                         backgroundColor: 'rgba(255, 99, 132, 0.2)',
                         borderColor: 'rgba(255, 99, 132, 1)',
                         borderWidth: 1,
                     },
                     {
-                        label: '累計',
+                        label: '達成率(%)',
                         data: {{ DatasPlot3|safe }},
                         backgroundColor: 'rgba(0, 0, 160, 0.2)',
                         borderColor: 'rgba(128, 128, 255, 1)',
